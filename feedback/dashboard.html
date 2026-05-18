@@ -11,6 +11,44 @@
       background: #f2f2f7; color: #1c1c1e; min-height: 100vh;
     }
 
+    /* ---- Auth Screens ---- */
+    .auth-screen {
+      display: none; min-height: 100vh;
+      align-items: center; justify-content: center; flex-direction: column;
+      gap: 16px; padding: 32px;
+    }
+    .auth-screen.active { display: flex; }
+    .auth-box {
+      background: white; border-radius: 20px; padding: 40px 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1); max-width: 380px; width: 100%;
+      text-align: center;
+    }
+    .auth-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #888; margin-bottom: 24px; }
+    .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .auth-sub { font-size: 14px; color: #8e8e93; margin-bottom: 28px; }
+    .pin-input {
+      width: 100%; padding: 14px 16px; border: 2px solid #e5e5ea; border-radius: 12px;
+      font-size: 28px; text-align: center; letter-spacing: 0.3em; font-weight: 700;
+      color: #1c1c1e; background: #fafafa; outline: none; margin-bottom: 16px;
+      -webkit-text-security: disc;
+    }
+    .pin-input:focus { border-color: #007aff; }
+    .auth-btn {
+      width: 100%; padding: 14px; background: #007aff; color: white;
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .auth-btn:hover { opacity: 0.87; }
+    .auth-btn:disabled { opacity: 0.4; cursor: default; }
+    .auth-error {
+      font-size: 14px; color: #ff3b30; font-weight: 600;
+      min-height: 20px; margin-top: 4px;
+    }
+    .denied-icon { font-size: 48px; margin-bottom: 8px; }
+
+    /* ---- Dashboard ---- */
+    #screen-dashboard { display: none; }
+
     .topbar {
       background: #1c1c1e; color: white; padding: 0 32px;
       height: 60px; display: flex; align-items: center; justify-content: space-between;
@@ -136,103 +174,133 @@
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <span class="topbar-logo">a9tion</span>
-    <span class="topbar-title">フィードバック ダッシュボード</span>
-  </div>
-  <div class="topbar-actions">
-    <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSVエクスポート</button>
+<!-- アクセス拒否画面（tokenなし） -->
+<div class="auth-screen" id="screen-denied">
+  <div class="auth-box">
+    <div class="auth-logo">a9tion</div>
+    <div class="denied-icon">🔒</div>
+    <div class="auth-title">アクセス権限がありません</div>
+    <div class="auth-sub">正しいURLからアクセスしてください。</div>
   </div>
 </div>
 
-<div class="main">
+<!-- PIN入力画面 -->
+<div class="auth-screen" id="screen-pin">
+  <div class="auth-box">
+    <div class="auth-logo">a9tion</div>
+    <div class="auth-title">ダッシュボード</div>
+    <div class="auth-sub">PINコードを入力してください</div>
+    <input
+      class="pin-input" type="password" id="pin-input"
+      inputmode="numeric" maxlength="6" autocomplete="off"
+      placeholder="••••••"
+    >
+    <div class="auth-error" id="pin-error"></div>
+    <button class="auth-btn" id="pin-submit" onclick="submitPin()">ログイン</button>
+  </div>
+</div>
 
-  <div class="stats-grid">
-    <div class="stat-card blue">
-      <div class="stat-label">総件数</div>
-      <div class="stat-value" id="stat-total">0</div>
-      <div class="stat-sub">全期間</div>
+<!-- ダッシュボード本体 -->
+<div id="screen-dashboard">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">a9tion</span>
+      <span class="topbar-title" id="dashboard-title">フィードバック ダッシュボード</span>
     </div>
-    <div class="stat-card green">
-      <div class="stat-label">今日</div>
-      <div class="stat-value" id="stat-today">0</div>
-      <div class="stat-sub" id="stat-today-date">—</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-label">今週</div>
-      <div class="stat-value" id="stat-week">0</div>
-      <div class="stat-sub">直近7日間</div>
-    </div>
-    <div class="stat-card purple">
-      <div class="stat-label">ブランド数</div>
-      <div class="stat-value" id="stat-brands">0</div>
-      <div class="stat-sub">登録済み</div>
-    </div>
-    <div class="stat-card teal">
-      <div class="stat-label">スタッフ数</div>
-      <div class="stat-value" id="stat-staffs">0</div>
-      <div class="stat-sub">入力済み</div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSVエクスポート</button>
     </div>
   </div>
 
-  <div class="filter-bar">
-    <div class="filter-group">
-      <label>期間（開始）</label>
-      <input type="date" id="filter-from">
-    </div>
-    <div class="filter-group">
-      <label>期間（終了）</label>
-      <input type="date" id="filter-to">
-    </div>
-    <div class="filter-group">
-      <label>ブランド</label>
-      <select id="filter-brand">
-        <option value="">すべて</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>スタッフ</label>
-      <select id="filter-staff">
-        <option value="">すべて</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>フリーワード</label>
-      <input type="text" id="filter-search" placeholder="キーワードで検索...">
-    </div>
-    <div class="filter-actions">
-      <button class="btn btn-primary" onclick="applyFilter()">絞り込む</button>
-      <button class="btn btn-outline" style="background:#f2f2f7;color:#1c1c1e;border:none" onclick="resetFilter()">リセット</button>
-    </div>
-  </div>
+  <div class="main">
 
-  <div class="table-wrap">
-    <div class="table-header">
-      <div>
-        <span class="table-header-title">フィードバック一覧</span>
-        <span class="count-badge" id="result-count">0件</span>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">総件数</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-sub">全期間</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">今日</div>
+        <div class="stat-value" id="stat-today">0</div>
+        <div class="stat-sub" id="stat-today-date">—</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">今週</div>
+        <div class="stat-value" id="stat-week">0</div>
+        <div class="stat-sub">直近7日間</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">ブランド数</div>
+        <div class="stat-value" id="stat-brands">0</div>
+        <div class="stat-sub">登録済み</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">スタッフ数</div>
+        <div class="stat-value" id="stat-staffs">0</div>
+        <div class="stat-sub">入力済み</div>
       </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width:120px">日時</th>
-          <th style="width:120px">店舗</th>
-          <th style="width:120px">ブランド</th>
-          <th>フィードバック内容</th>
-          <th style="width:90px">スタッフ</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-    <div id="empty-state" class="empty-state" style="display:none">
-      <div class="icon">📋</div>
-      <p>フィードバックがありません</p>
-      <small>店員ページから音声入力してください</small>
-    </div>
-  </div>
 
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>期間（開始）</label>
+        <input type="date" id="filter-from">
+      </div>
+      <div class="filter-group">
+        <label>期間（終了）</label>
+        <input type="date" id="filter-to">
+      </div>
+      <div class="filter-group">
+        <label>ブランド</label>
+        <select id="filter-brand">
+          <option value="">すべて</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>スタッフ</label>
+        <select id="filter-staff">
+          <option value="">すべて</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>フリーワード</label>
+        <input type="text" id="filter-search" placeholder="キーワードで検索...">
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="applyFilter()">絞り込む</button>
+        <button class="btn btn-outline" style="background:#f2f2f7;color:#1c1c1e;border:none" onclick="resetFilter()">リセット</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <div>
+          <span class="table-header-title">フィードバック一覧</span>
+          <span class="count-badge" id="result-count">0件</span>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:120px">日時</th>
+            <th style="width:120px">店舗</th>
+            <th style="width:120px">ブランド</th>
+            <th>フィードバック内容</th>
+            <th style="width:90px">スタッフ</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <div class="icon">📋</div>
+        <p>フィードバックがありません</p>
+        <small>店員ページから音声入力してください</small>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
@@ -246,14 +314,61 @@
 <script>
 const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbyO3JlAWzhQAI2yvbcREhHcptILJeUlrKtPvlOotaEll2cWN0n2szmpGFZKyywXUfAwCw/exec';
 
-async function loadData() {
-  try {
-    const res = await fetch(ENDPOINT_URL);
-    return await res.json();
-  } catch (err) {
-    console.error('データ取得エラー:', err);
-    return [];
+const params = new URLSearchParams(location.search);
+const TOKEN  = params.get('token') || '';
+let   _pin   = '';
+
+// --- 起動時: tokenの有無でどの画面を出すか決める ---
+(function init() {
+  if (!TOKEN) {
+    document.getElementById('screen-denied').classList.add('active');
+    return;
   }
+  document.getElementById('screen-pin').classList.add('active');
+  const input = document.getElementById('pin-input');
+  input.focus();
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
+})();
+
+// --- PIN認証 ---
+async function submitPin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  if (!pin) return;
+
+  const btn = document.getElementById('pin-submit');
+  const errEl = document.getElementById('pin-error');
+  btn.disabled = true;
+  btn.textContent = '確認中...';
+  errEl.textContent = '';
+
+  try {
+    const res  = await fetch(`${ENDPOINT_URL}?action=auth&token=${encodeURIComponent(TOKEN)}&pin=${encodeURIComponent(pin)}`);
+    const json = await res.json();
+
+    if (json.success) {
+      _pin = pin;
+      document.getElementById('screen-pin').classList.remove('active');
+      document.getElementById('screen-dashboard').style.display = 'block';
+      document.getElementById('dashboard-title').textContent = json.display_name + ' — フィードバック';
+      loadDashboard();
+    } else {
+      errEl.textContent = 'PINが正しくありません';
+      btn.disabled = false;
+      btn.textContent = 'ログイン';
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-input').focus();
+    }
+  } catch (err) {
+    errEl.textContent = '通信エラーが発生しました';
+    btn.disabled = false;
+    btn.textContent = 'ログイン';
+  }
+}
+
+// --- データ取得 ---
+async function loadData() {
+  const res = await fetch(`${ENDPOINT_URL}?token=${encodeURIComponent(TOKEN)}&pin=${encodeURIComponent(_pin)}`);
+  return await res.json();
 }
 
 function todayStr() {
@@ -390,15 +505,18 @@ document.getElementById('filter-search').addEventListener('input', applyFilter);
 document.getElementById('filter-brand').addEventListener('change', applyFilter);
 document.getElementById('filter-staff').addEventListener('change', applyFilter);
 
-async function init() {
+async function loadDashboard() {
   document.getElementById('result-count').textContent = '読込中...';
-  _cachedData = await loadData();
-  updateStats(_cachedData);
-  populateFilters(_cachedData);
-  renderTable(_cachedData);
+  try {
+    _cachedData = await loadData();
+    updateStats(_cachedData);
+    populateFilters(_cachedData);
+    renderTable(_cachedData);
+  } catch (err) {
+    console.error('データ取得エラー:', err);
+    document.getElementById('result-count').textContent = 'エラー';
+  }
 }
-
-init();
 </script>
 </body>
 </html>
