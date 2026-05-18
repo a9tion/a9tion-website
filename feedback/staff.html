@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>フィードバック入力 | a9tion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f2f2f7; min-height: 100vh;
+      padding: 20px 16px 40px; color: #1c1c1e;
+    }
+
+    .header { text-align: center; margin-bottom: 24px; }
+    .header .logo {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.12em;
+      color: #888; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .header h1 { font-size: 20px; font-weight: 700; color: #1c1c1e; }
+    .header .store-badge {
+      display: inline-block; margin-top: 8px; padding: 4px 12px;
+      background: #1c1c1e; color: white; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+    }
+    .staff-bar {
+      margin-top: 10px; font-size: 13px; color: #636366;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .staff-bar strong { color: #1c1c1e; }
+    .logout-btn {
+      font-size: 12px; color: #007aff; background: none; border: none;
+      cursor: pointer; padding: 0; font-weight: 500;
+    }
+
+    .card {
+      background: white; border-radius: 14px; padding: 20px;
+      margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .card-title {
+      font-size: 12px; font-weight: 700; color: #888;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
+    }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    label { display: block; font-size: 13px; color: #636366; margin-bottom: 6px; font-weight: 500; }
+
+    select {
+      width: 100%; padding: 13px 14px; border: 1.5px solid #e5e5ea; border-radius: 10px;
+      font-size: 16px; color: #1c1c1e; background: #fafafa;
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px;
+    }
+    select:focus { outline: none; border-color: #007aff; background-color: white; }
+
+    .record-section { text-align: center; padding: 8px 0 20px; }
+    .record-btn {
+      width: 110px; height: 110px; border-radius: 50%; border: none;
+      background: #ff3b30; color: white; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; margin: 0 auto 18px;
+      box-shadow: 0 6px 20px rgba(255,59,48,0.45);
+      transition: transform 0.12s, box-shadow 0.12s; gap: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .record-btn:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(255,59,48,0.3); }
+    .record-btn.recording { background: #c0392b; animation: pulse 1.4s ease-in-out infinite; }
+    .record-btn.done { background: #34c759; box-shadow: 0 6px 20px rgba(52,199,89,0.4); }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0   rgba(255,59,48,0.5); }
+      70%  { box-shadow: 0 0 0 18px rgba(255,59,48,0); }
+      100% { box-shadow: 0 0 0 0   rgba(255,59,48,0); }
+    }
+    .record-icon  { font-size: 32px; line-height: 1; }
+    .record-label { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; }
+
+    .status-msg { font-size: 14px; color: #8e8e93; min-height: 20px; }
+    .status-msg.active { color: #ff3b30; font-weight: 500; }
+    .status-msg.done   { color: #34c759; font-weight: 500; }
+
+    textarea {
+      width: 100%; min-height: 130px; padding: 13px 14px;
+      border: 1.5px solid #e5e5ea; border-radius: 10px; font-size: 15px;
+      color: #1c1c1e; background: #fafafa; resize: none;
+      line-height: 1.65; font-family: inherit;
+    }
+    textarea:focus { outline: none; border-color: #007aff; background: white; }
+    .hint { font-size: 12px; color: #aeaeb2; margin-top: 7px; }
+
+    .submit-btn {
+      width: 100%; padding: 17px; background: #1c1c1e; color: white; border: none;
+      border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: opacity 0.15s;
+    }
+    .submit-btn:active { opacity: 0.8; }
+    .submit-btn:disabled { background: #c7c7cc; cursor: not-allowed; }
+
+    .warning-box {
+      background: #fff9e6; border: 1px solid #ffd60a; border-radius: 10px;
+      padding: 12px 14px; font-size: 13px; color: #7d5400; margin-bottom: 14px;
+    }
+
+    .toast {
+      position: fixed; bottom: 36px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1c1c1e; color: white; padding: 13px 26px;
+      border-radius: 28px; font-size: 15px; font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo" id="header-client">a9tion</div>
+  <h1>フィードバック入力</h1>
+  <span class="store-badge" id="store-badge">店舗名未設定</span>
+  <div class="staff-bar">
+    <span>入力者：<strong id="staff-name-display">—</strong></span>
+    <button class="logout-btn" onclick="logout()">ログアウト</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">基本情報</div>
+  <div class="field">
+    <label>ブランド <span style="color:#ff3b30">*</span></label>
+    <select id="brand">
+      <option value="">選択してください</option>
+    </select>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">フィードバック入力</div>
+
+  <div id="no-support" class="warning-box" style="display:none">
+    ⚠️ このブラウザは音声入力に対応していません。テキストエリアに直接入力してください。
+  </div>
+
+  <div class="record-section">
+    <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+      <span class="record-icon" id="recordIcon">🎙</span>
+      <span class="record-label" id="recordLabel">タップして録音</span>
+    </button>
+    <p class="status-msg" id="statusMsg">ボタンを押して話してください</p>
+  </div>
+
+  <div>
+    <label>フィードバック内容 <span style="color:#ff3b30">*</span></label>
+    <textarea id="transcript" placeholder="音声入力後にここに表示されます。直接編集もできます。"></textarea>
+    <p class="hint">修正が必要な場合はテキストを直接編集してください</p>
+  </div>
+</div>
+
+<button class="submit-btn" id="submitBtn" onclick="submitFeedback()">送信する</button>
+<div class="toast" id="toast">✓ 送信しました！</div>
+
+<script>
+const AUTH_KEY = 'a9tion_auth';
+const AUTH_TTL = 24 * 60 * 60 * 1000;
+
+// 認証チェック（ログインしていなければlogin.htmlへ）
+let loggedInStaff = '';
+(function checkAuth() {
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) return redirectLogin();
+  try {
+    const d = JSON.parse(raw);
+    if (Date.now() - d.loginTime > AUTH_TTL) {
+      localStorage.removeItem(AUTH_KEY);
+      return redirectLogin();
+    }
+    loggedInStaff = d.name;
+  } catch(e) {
+    localStorage.removeItem(AUTH_KEY);
+    redirectLogin();
+  }
+})();
+
+function redirectLogin() {
+  location.href = 'login.html?redirect=' + encodeURIComponent(location.href);
+}
+
+function logout() {
+  localStorage.removeItem(AUTH_KEY);
+  location.href = 'login.html';
+}
+
+// URLパラメータ
+// 例: ?client=Makuake&store=渋谷サクラステージ&brands=ブランドA,ブランドB
+const params  = new URLSearchParams(location.search);
+const CLIENT  = params.get('client') || 'a9tion';
+const STORE   = params.get('store')  || '店舗名未設定';
+const BRANDS  = params.get('brands')
+  ? params.get('brands').split(',').map(s => s.trim()).filter(Boolean)
+  : ['その他'];
+
+const ENDPOINT_URL = 'YOUR_ENDPOINT_URL'; // Apps Scriptデプロイ後URLに差し替える
+
+// ヘッダー
+document.getElementById('header-client').textContent = CLIENT;
+document.getElementById('store-badge').textContent = STORE;
+document.getElementById('staff-name-display').textContent = loggedInStaff;
+
+// ブランドセレクト
+const brandSel = document.getElementById('brand');
+BRANDS.forEach(b => {
+  const opt = document.createElement('option');
+  opt.value = b; opt.textContent = b;
+  brandSel.appendChild(opt);
+});
+
+// 音声認識
+let recognition = null;
+let isRecording = false;
+let accumulatedText = '';
+
+function initSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('no-support').style.display = 'block';
+    document.getElementById('recordBtn').style.display = 'none';
+    document.getElementById('statusMsg').style.display = 'none';
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = 'ja-JP';
+  recognition.interimResults = true;
+  recognition.continuous = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('recordBtn').className = 'record-btn recording';
+    document.getElementById('recordLabel').textContent = '録音中...';
+    document.getElementById('recordIcon').textContent = '⏹';
+    setStatus('active', '🔴 聞いています... 話し終わったら止めてください');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    let newFinal = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) newFinal += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (newFinal) accumulatedText += newFinal;
+    document.getElementById('transcript').value = (accumulatedText + interim).trim();
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    const hasText = accumulatedText.trim().length > 0;
+    document.getElementById('recordBtn').className = hasText ? 'record-btn done' : 'record-btn';
+    document.getElementById('recordLabel').textContent = hasText ? 'もう一度録音' : 'タップして録音';
+    document.getElementById('recordIcon').textContent = '🎙';
+    if (hasText) {
+      document.getElementById('transcript').value = accumulatedText.trim();
+      setStatus('done', '✓ 認識完了。内容を確認して送信してください');
+    } else {
+      setStatus('', 'ボタンを押して話してください');
+    }
+  };
+
+  recognition.onerror = (e) => {
+    isRecording = false;
+    document.getElementById('recordBtn').className = 'record-btn';
+    document.getElementById('recordLabel').textContent = 'タップして録音';
+    document.getElementById('recordIcon').textContent = '🎙';
+    const msgs = {
+      'no-speech':   'お声が聞こえませんでした。もう一度どうぞ。',
+      'not-allowed': 'マイクへのアクセスを許可してください。',
+      'network':     'ネットワークエラー。Wi-Fiを確認してください。',
+    };
+    setStatus('', msgs[e.error] || 'エラーが発生しました。もう一度試してください。');
+  };
+}
+
+function setStatus(cls, msg) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status-msg' + (cls ? ' ' + cls : '');
+  el.textContent = msg;
+}
+
+function toggleRecording() {
+  if (!recognition) return;
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    accumulatedText = document.getElementById('transcript').value.trim();
+    if (accumulatedText) accumulatedText += ' ';
+    recognition.start();
+  }
+}
+
+async function submitFeedback() {
+  const brand = document.getElementById('brand').value;
+  const text  = document.getElementById('transcript').value.trim();
+
+  if (!brand) { alert('ブランドを選択してください'); return; }
+  if (!text)  { alert('フィードバック内容を入力してください'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '送信中...';
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const entry = {
+    id: Date.now().toString(),
+    date: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`,
+    time: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
+    store: STORE,
+    brand,
+    staff: loggedInStaff,
+    feedback: text,
+    createdAt: now.getTime(),
+  };
+
+  try {
+    await fetch(ENDPOINT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) });
+  } catch (err) { /* no-cors: 正常 */ }
+
+  document.getElementById('brand').value = '';
+  document.getElementById('transcript').value = '';
+  accumulatedText = '';
+  document.getElementById('recordBtn').className = 'record-btn';
+  document.getElementById('recordLabel').textContent = 'タップして録音';
+  setStatus('', 'ボタンを押して話してください');
+  btn.disabled = false; btn.textContent = '送信する';
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+initSpeech();
+</script>
+</body>
+</html>

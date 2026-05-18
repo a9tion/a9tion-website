@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service - A9tion K.K.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Noto+Sans+JP:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #e5e3df; 
+            --text: #1a1a1a;
+            --accent: #000000;
+            --btn-bg: #333333; 
+        }
+        
+        html { scroll-behavior: smooth; }
+        * { cursor: none !important; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; transition: color 0.3s; }
+
+        /* --- ヘッダー（固定） --- */
+        .header {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4vw;
+            box-sizing: border-box;
+            background-color: var(--bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .logo img { height: 40px; width: auto; }
+        .header-nav { display: flex; gap: 25px; align-items: center; }
+        .nav-link {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #000;
+            position: relative;
+            font-weight: 500;
+        }
+        .nav-link::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 1px; background: #000; transition: 0.3s; }
+        .nav-link:hover::after { width: 100%; }
+
+        #lang-switch {
+            border: 1px solid #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- メインレイアウト --- */
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 120px 4vw 60px; 
+        }
+        .sec-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        /* イントロダクションエリア */
+        .service-intro {
+            max-width: 850px;
+            margin-bottom: 5rem;
+        }
+        .service-intro h3 { 
+            font-size: 1.8rem; 
+            margin-bottom: 1.5rem; 
+            font-weight: 700; 
+            line-height: 1.4;
+        }
+        .service-intro p { 
+            line-height: 2; 
+            font-weight: 300; 
+            font-size: 1.05rem;
+        }
+
+        /* グリッドレイアウト */
+        .service-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .service-column {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .service-item {
+            margin-bottom: 60px;
+        }
+
+        .service-item-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .service-item-title::before {
+            content: "■";
+            margin-right: 12px;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .service-item-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: #1a1a1a;
+            font-weight: 300;
+            padding-left: 28px;
+        }
+
+        /* 日本語ページ用画像スタイル */
+        .service-img-jp {
+            width: calc(100% - 28px);
+            margin-left: 28px;
+            margin-top: 20px;
+            border-radius: 4px;
+            display: block;
+            height: auto;
+        }
+
+        /* 英語用リスト形式 */
+        .sub-list {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 20px;
+        }
+        .sub-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        .sub-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+        .en-quote {
+            font-style: italic;
+            font-size: 1.2rem;
+            margin-top: 40px;
+            border-left: 3px solid #333;
+            padding-left: 20px;
+            font-weight: 500;
+        }
+
+        /* --- Cursor --- */
+        .cursor-dot, .cursor-circle {
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 10000;
+            border-radius: 50%; transform: translate(-50%, -50%); mix-blend-mode: exclusion;
+        }
+        .cursor-dot { width: 8px; height: 8px; background: white; }
+        .cursor-circle { width: 40px; height: 40px; border: 1px solid white; transition: 0.2s; }
+        body.hovering .cursor-circle { width: 70px; height: 70px; background: rgba(255,255,255,0.1); }
+
+        @media (max-width: 968px) {
+            .service-grid { grid-template-columns: 1fr; gap: 40px; }
+            .container { padding-top: 100px; }
+            .sec-title { font-size: 2rem; }
+            .service-intro h3 { font-size: 1.5rem; }
+            .service-img-jp { width: 100%; margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <header class="header">
+        <div class="logo">
+            <a href="index.html"><img src="image/logo.png" alt="logo" onerror="this.style.display='none'"></a>
+        </div>
+        <nav class="header-nav">
+            <a href="index.html" class="nav-link hover-target">TOP</a>
+            <a href="index.html#about" class="nav-link hover-target">ABOUT US</a>
+            <a href="https://www.a9tion.com/contact" class="nav-link hover-target">CONTACT</a>
+            <a href="javascript:void(0)" class="nav-link hover-target" id="lang-switch">EN</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2 class="sec-title">SERVICE</h2>
+        <div id="service-render-area">
+            </div>
+    </div>
+
+    <script>
+        const translations = {
+            ja: {
+                langLabel: "EN",
+                html: `
+                    <div class="service-intro">
+                        <h3>構想から立ち上げまで、最初の一歩を確実に。</h3>
+                        <p>a9tionは、実店舗やリアルな体験設計を起点に、<br>
+                        アイデア想起から実証実験までを最短距離で実行し、<br>
+                        0から1を生み出す新規事業の立ち上げを支援します。</p>
+                    </div>
+                    <div class="service-grid">
+                        <div class="service-column">
+                            <div class="service-item">
+                                <div class="service-item-title">新規事業 0→1 伴走支援</div>
+                                <div class="service-item-desc">オフラインの新規事業立ち上げを強みに、アイデア想起から実証実験までを最速スピードで実行します。</div>
+                                <img src="image/service-jp-01.png" class="service-img-jp" alt="新規事業伴走支援" onerror="this.style.display='none'">
+                            </div>
+                            <div class="service-item">
+                                <div class="service-item-title">リテール・CXデザイン</div>
+                                <div class="service-item-desc">実店舗やポップアップストアの企画作りから、売り場を顧客体験の場へ転換します。</div>
+                                <img src="image/service-jp-retail.png" class="service-img-jp" alt="リテール・CXデザイン" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                        <div class="service-column">
+                            <div class="service-item">
+                                <div class="service-item-title">市場浸透・プロモーション</div>
+                                <div class="service-item-desc">ターゲットに刺さる体験型イベントやPRを活用した短期/中長期イベントを設計。一過性で終わらせない、ブランドのファン作りを加速させます。</div>
+                                <img src="image/service-jp-promotion.png" class="service-img-jp" alt="市場浸透・プロモーション" onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            en: {
+                langLabel: "JP",
+                html: `
+                    <div class="service-intro">
+                        <h3>Your Gateway to the Japanese Market</h3>
+                        <p><strong>Supporting your first step with confidence, from strategy to execution.</strong><br><br>
+                        Entering Japan requires more than just translation; it requires cultural fluency and local expertise. a9tion provides the end-to-end support necessary to transform your global vision into a local success story. We don't just advise—we execute.</p>
+                    </div>
+                    <div class="service-grid">
+                        <div class="service-column">
+                            <div class="service-item">
+                                <div class="service-item-title">Market Intelligence & Strategy</div>
+                                <div class="service-item-desc">Building the foundation for a successful debut. Before you invest, we ensure your brand is positioned to win. We bridge the gap between your global identity and the Japanese consumer mindset.
+                                    <ul class="sub-list">
+                                        <li><strong>Localized Insights:</strong> Deep dives into consumer behavior, retail trends, and the competitive landscape.</li>
+                                        <li><strong>Go-to-Market (GTM) Planning:</strong> Tailored strategies for pricing, messaging, and distribution channels.</li>
+                                        <li><strong>Regulatory & Compliance:</strong> Ensuring your products and operations meet local standards from day one.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-item-title">Retail Execution & Launch</div>
+                                <div class="service-item-desc">Bringing your brand to life on the ground. We handle the complexities of physical and digital entry, allowing you to test the waters or dive in with a flagship presence.
+                                    <ul class="sub-list">
+                                        <li><strong>Pop-up & Test Marketing:</strong> Short-term activations to validate demand and build initial brand heat.</li>
+                                        <li><strong>Permanent Store Development:</strong> Full-scale support for location scouting, lease negotiation, and store design.</li>
+                                        <li><strong>Operational Design:</strong> Creating localized manuals, training systems, and management frameworks to ensure "Japan-quality" service.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="service-column">
+                            <div class="service-item">
+                                <div class="service-item-title">Interim Leadership & Management</div>
+                                <div class="service-item-desc">Your boots on the ground in Tokyo. Setting up a local entity takes time. We provide the leadership necessary to run your operations while you scale.
+                                    <ul class="sub-list">
+                                        <li><strong>Interim Country Management:</strong> We act as your temporary Japan HQ, leading operations for up to one year until your permanent team is in place.</li>
+                                        <li><strong>Partner & Vendor Selection:</strong> Identifying and managing the right local distributors, agencies, and logistics providers.</li>
+                                        <li><strong>Operational Excellence:</strong> Continuous optimization of local workflows to ensure sustainable growth.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="en-quote">"We don't just help you enter Japan. We help you belong there."</div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        let currentLang = 'ja';
+
+        function updateContent() {
+            const t = translations[currentLang];
+            document.getElementById('lang-switch').textContent = t.langLabel;
+            document.getElementById('service-render-area').innerHTML = t.html;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lang-switch').addEventListener('click', () => {
+                currentLang = currentLang === 'ja' ? 'en' : 'ja';
+                updateContent();
+            });
+            updateContent();
+
+            // Cursor
+            const dot = document.querySelector('.cursor-dot');
+            const circle = document.querySelector('.cursor-circle');
+            document.addEventListener('mousemove', (e) => {
+                dot.style.left = circle.style.left = e.clientX + 'px';
+                dot.style.top = circle.style.top = e.clientY + 'px';
+            });
+            document.body.addEventListener('mouseover', (e) => {
+                if (e.target.closest('.hover-target') || e.target.tagName === 'A') document.body.classList.add('hovering');
+                else document.body.classList.remove('hovering');
+            });
+        });
+    </script>
+</body>
+</html>

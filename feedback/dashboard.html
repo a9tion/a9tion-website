@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フィードバック ダッシュボード | a9tion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: #f2f2f7; color: #1c1c1e; min-height: 100vh;
+    }
+
+    .topbar {
+      background: #1c1c1e; color: white; padding: 0 32px;
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #888; }
+    .topbar-title { font-size: 18px; font-weight: 700; }
+    .topbar-actions { display: flex; gap: 10px; }
+    .btn {
+      padding: 8px 16px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: white; }
+    .btn-primary { background: #007aff; color: white; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    .main { padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 16px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white; border-radius: 14px; padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .stat-label { font-size: 12px; color: #8e8e93; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .stat-value { font-size: 36px; font-weight: 700; line-height: 1; }
+    .stat-sub { font-size: 12px; color: #8e8e93; margin-top: 6px; }
+    .stat-card.blue   .stat-value { color: #007aff; }
+    .stat-card.green  .stat-value { color: #34c759; }
+    .stat-card.orange .stat-value { color: #ff9f0a; }
+    .stat-card.purple .stat-value { color: #bf5af2; }
+    .stat-card.teal   .stat-value { color: #5ac8fa; }
+
+    .filter-bar {
+      background: white; border-radius: 14px; padding: 18px 22px;
+      margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 11px; color: #8e8e93; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .filter-group select,
+    .filter-group input {
+      padding: 9px 12px; border: 1.5px solid #e5e5ea; border-radius: 8px;
+      font-size: 14px; color: #1c1c1e; background: #fafafa;
+      -webkit-appearance: none; min-width: 130px;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus { outline: none; border-color: #007aff; }
+    .filter-actions { display: flex; gap: 8px; margin-left: auto; align-self: flex-end; }
+
+    .table-wrap {
+      background: white; border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07); overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 22px; border-bottom: 1px solid #f2f2f7;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-header-title { font-size: 15px; font-weight: 700; }
+    .count-badge {
+      display: inline-block; background: #f2f2f7; color: #636366;
+      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 8px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; padding: 12px 20px; font-size: 11px; font-weight: 700;
+      color: #8e8e93; text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid #f2f2f7; background: #fafafa;
+    }
+    tbody tr { border-bottom: 1px solid #f2f2f7; transition: background 0.1s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f9f9fb; }
+    tbody td { padding: 14px 20px; font-size: 14px; vertical-align: top; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-brand { background: #e8f0fe; color: #1a56db; }
+    .badge-store { background: #f0fdf4; color: #166534; }
+
+    .feedback-text { max-width: 420px; color: #3a3a3c; line-height: 1.55; }
+    .feedback-text.collapsed {
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .datetime { color: #8e8e93; font-size: 13px; }
+    .staff-name { color: #636366; font-size: 13px; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #8e8e93; }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+    .empty-state small { font-size: 13px; display: block; margin-top: 6px; }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 16px; padding: 28px;
+      max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .modal-feedback { font-size: 16px; line-height: 1.7; color: #1c1c1e; white-space: pre-wrap; margin-bottom: 20px; }
+    .modal-close {
+      width: 100%; padding: 12px; background: #f2f2f7; border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: #1c1c1e;
+    }
+    .modal-close:hover { background: #e5e5ea; }
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main { padding: 20px 16px; }
+      .topbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">a9tion</span>
+    <span class="topbar-title">フィードバック ダッシュボード</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSVエクスポート</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">総件数</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-sub">全期間</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">今日</div>
+      <div class="stat-value" id="stat-today">0</div>
+      <div class="stat-sub" id="stat-today-date">—</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-label">今週</div>
+      <div class="stat-value" id="stat-week">0</div>
+      <div class="stat-sub">直近7日間</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">ブランド数</div>
+      <div class="stat-value" id="stat-brands">0</div>
+      <div class="stat-sub">登録済み</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="stat-label">スタッフ数</div>
+      <div class="stat-value" id="stat-staffs">0</div>
+      <div class="stat-sub">入力済み</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>期間（開始）</label>
+      <input type="date" id="filter-from">
+    </div>
+    <div class="filter-group">
+      <label>期間（終了）</label>
+      <input type="date" id="filter-to">
+    </div>
+    <div class="filter-group">
+      <label>ブランド</label>
+      <select id="filter-brand">
+        <option value="">すべて</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>スタッフ</label>
+      <select id="filter-staff">
+        <option value="">すべて</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>フリーワード</label>
+      <input type="text" id="filter-search" placeholder="キーワードで検索...">
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-primary" onclick="applyFilter()">絞り込む</button>
+      <button class="btn btn-outline" style="background:#f2f2f7;color:#1c1c1e;border:none" onclick="resetFilter()">リセット</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <div>
+        <span class="table-header-title">フィードバック一覧</span>
+        <span class="count-badge" id="result-count">0件</span>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:120px">日時</th>
+          <th style="width:120px">店舗</th>
+          <th style="width:120px">ブランド</th>
+          <th>フィードバック内容</th>
+          <th style="width:90px">スタッフ</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state" style="display:none">
+      <div class="icon">📋</div>
+      <p>フィードバックがありません</p>
+      <small>店員ページから音声入力してください</small>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="modal-feedback" id="modal-text"></div>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">閉じる</button>
+  </div>
+</div>
+
+<script>
+const ENDPOINT_URL = 'YOUR_ENDPOINT_URL'; // Apps Scriptデプロイ後URLに差し替える
+
+async function loadData() {
+  try {
+    const res = await fetch(ENDPOINT_URL);
+    return await res.json();
+  } catch (err) {
+    console.error('データ取得エラー:', err);
+    return [];
+  }
+}
+
+function todayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function updateStats(data) {
+  const today   = todayStr();
+  const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
+  document.getElementById('stat-total').textContent  = data.length;
+  document.getElementById('stat-today').textContent  = data.filter(d => d.date === today).length;
+  document.getElementById('stat-today-date').textContent = today;
+  document.getElementById('stat-week').textContent   = data.filter(d => new Date(d.createdAt) >= weekAgo).length;
+  document.getElementById('stat-brands').textContent = new Set(data.map(d => d.brand)).size;
+  document.getElementById('stat-staffs').textContent = new Set(data.map(d => d.staff).filter(s => s && s !== '—')).size;
+}
+
+function populateFilters(data) {
+  const brands = [...new Set(data.map(d => d.brand))].sort();
+  const staffs = [...new Set(data.map(d => d.staff).filter(s => s && s !== '—'))].sort();
+
+  const brandSel = document.getElementById('filter-brand');
+  const curBrand = brandSel.value;
+  brandSel.innerHTML = '<option value="">すべて</option>';
+  brands.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b; opt.textContent = b;
+    if (b === curBrand) opt.selected = true;
+    brandSel.appendChild(opt);
+  });
+
+  const staffSel = document.getElementById('filter-staff');
+  const curStaff = staffSel.value;
+  staffSel.innerHTML = '<option value="">すべて</option>';
+  staffs.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    if (s === curStaff) opt.selected = true;
+    staffSel.appendChild(opt);
+  });
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  document.getElementById('result-count').textContent = data.length + '件';
+
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.slice().reverse().map(entry => `
+    <tr onclick='openModal(${JSON.stringify(entry).replace(/'/g, "&#39;")})'>
+      <td>
+        <div class="datetime">${entry.date}</div>
+        <div class="datetime">${entry.time}</div>
+      </td>
+      <td><span class="badge badge-store">${escHtml(entry.store)}</span></td>
+      <td><span class="badge badge-brand">${escHtml(entry.brand)}</span></td>
+      <td><div class="feedback-text collapsed">${escHtml(entry.feedback)}</div></td>
+      <td><span class="staff-name">${escHtml(entry.staff)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let _cachedData = [];
+
+function applyFilter() {
+  const from   = document.getElementById('filter-from').value;
+  const to     = document.getElementById('filter-to').value;
+  const brand  = document.getElementById('filter-brand').value;
+  const staff  = document.getElementById('filter-staff').value;
+  const search = document.getElementById('filter-search').value.toLowerCase();
+
+  const filtered = _cachedData.filter(d => {
+    if (from  && d.date < from) return false;
+    if (to    && d.date > to)   return false;
+    if (brand && d.brand !== brand) return false;
+    if (staff && d.staff !== staff) return false;
+    if (search && !d.feedback.toLowerCase().includes(search)
+               && !d.brand.toLowerCase().includes(search)
+               && !d.staff.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  renderTable(filtered);
+}
+
+function resetFilter() {
+  ['filter-from','filter-to','filter-brand','filter-staff','filter-search']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  renderTable(_cachedData);
+}
+
+function openModal(entry) {
+  document.getElementById('modal-meta').innerHTML = `
+    <span class="badge badge-store">${escHtml(entry.store)}</span>
+    <span class="badge badge-brand">${escHtml(entry.brand)}</span>
+    <span style="font-size:13px;color:#8e8e93">${entry.date} ${entry.time}</span>
+    <span style="font-size:13px;color:#8e8e93">担当：${escHtml(entry.staff)}</span>
+  `;
+  document.getElementById('modal-text').textContent = entry.feedback;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+
+function exportCSV() {
+  if (_cachedData.length === 0) { alert('エクスポートするデータがありません'); return; }
+  const header = ['ID','日付','時刻','店舗','ブランド','スタッフ','フィードバック'];
+  const rows = _cachedData.map(d => [
+    d.id, d.date, d.time, d.store, d.brand, d.staff,
+    '"' + d.feedback.replace(/"/g,'""') + '"'
+  ]);
+  const csv = '﻿' + [header, ...rows].map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `a9tion_feedback_${todayStr()}.csv`;
+  a.click();
+}
+
+document.getElementById('filter-search').addEventListener('input', applyFilter);
+document.getElementById('filter-brand').addEventListener('change', applyFilter);
+document.getElementById('filter-staff').addEventListener('change', applyFilter);
+
+async function init() {
+  document.getElementById('result-count').textContent = '読込中...';
+  _cachedData = await loadData();
+  updateStats(_cachedData);
+  populateFilters(_cachedData);
+  renderTable(_cachedData);
+}
+
+init();
+</script>
+</body>
+</html>

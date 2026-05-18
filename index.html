@@ -1,0 +1,338 @@
+ <!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>A9tion K.K. - AVANTGARDE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Syncopate:wght@700&family=Noto+Sans+JP:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #e5e3df; 
+            --text: #1a1a1a;
+            --accent: #000000;
+            --btn-bg: #333333; 
+        }
+        
+        html { scroll-behavior: smooth; }
+        * { cursor: none !important; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            /* Poppinsを最優先に設定（英数字に適用されます） */
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; transition: color 0.3s; }
+
+        /* --- ヘッダー（固定） --- */
+        .header {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4vw;
+            box-sizing: border-box;
+            background-color: var(--bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .logo img { height: 40px; width: auto; }
+        .header-nav { display: flex; gap: 25px; align-items: center; }
+        .nav-link {
+            /* ナビゲーションにPoppinsを適用 */
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #000;
+            position: relative;
+            font-weight: 500;
+        }
+        .nav-link::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 1px; background: #000; transition: 0.3s; }
+        .nav-link:hover::after { width: 100%; }
+
+        #lang-switch {
+            border: 1px solid #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- HEROセクション --- */
+        .hero-section { 
+            padding: 100px 4vw 30px; 
+            box-sizing: border-box; 
+        }
+        .hero-image-wrap {
+            height: 85vh; 
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background-image: url('image/hero-bg.png'); 
+            background-size: cover;
+            background-position: center; 
+        }
+
+        /* --- MESSAGEセクション --- */
+        .message-section {
+            padding: 50px 4vw; 
+            display: flex;
+            gap: 5vw;
+            align-items: flex-start; 
+        }
+        .message-left {
+            flex: 0 0 40%;
+            margin-top: calc(2.2rem + 2rem + 0.5rem + 1px); 
+        }
+        .ceo-img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            filter: grayscale(100%);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        .ceo-name {
+            font-size: 1rem;
+            color: #333;
+            letter-spacing: 0.05em;
+            font-family: 'Poppins', sans-serif; /* 名前をPoppinsに */
+        }
+        .message-right {
+            flex: 1;
+        }
+        .message-title {
+            /* 見出しをPoppinsに */
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .message-body {
+            font-size: 1rem;
+            line-height: 2.2;
+            color: #1a1a1a;
+            font-weight: 300;
+        }
+        .message-body p {
+            margin-bottom: 1.5rem;
+        }
+        .message-lead {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        /* --- コンテンツ共通 --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 4vw; }
+        .sec { padding: 4rem 0 8rem; } 
+        .sec-title {
+            /* セクションタイトルをPoppinsに */
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .company-area { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; border-top: 1px solid #333; padding-top: 2rem; }
+        .co-dl { display: grid; grid-template-columns: 180px 1fr; row-gap: 2rem; margin: 0; }
+        .co-dt { 
+            font-family: 'Poppins', sans-serif; 
+            font-weight: 700; 
+            color: #555; 
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+        }
+        .co-dd {
+            font-weight: 300;
+        }
+        
+        /* --- FOOTER --- */
+        footer { padding: 8rem 0; text-align: center; border-top: 1px solid #333; }
+        .f-contact { 
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--btn-bg);
+            color: #ffffff !important;
+            padding: 1.4rem 5rem;
+            font-size: 1.6rem;
+            border-radius: 8px;
+            display: inline-block;
+            transition: 0.3s;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .f-contact:hover { background-color: #000; transform: scale(1.02); }
+
+        .copyright {
+            margin-top: 3rem;
+            color: #666;
+            font-size: 0.8rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- CURSOR --- */
+        .cursor-dot, .cursor-circle {
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 10000;
+            border-radius: 50%; transform: translate(-50%, -50%); mix-blend-mode: exclusion;
+        }
+        .cursor-dot { width: 8px; height: 8px; background: white; }
+        .cursor-circle { width: 40px; height: 40px; border: 1px solid white; transition: 0.2s; }
+        body.hovering .cursor-circle { width: 70px; height: 70px; background: rgba(255,255,255,0.1); }
+
+        @media (max-width: 968px) {
+            .message-section { flex-direction: column-reverse; padding: 30px 4vw; }
+            .message-left { flex: none; width: 100%; margin-top: 40px; }
+            .sec { padding: 3rem 0 6rem; }
+            .message-title, .sec-title { font-size: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .header-nav { gap: 10px; }
+            .nav-link { font-size: 0.65rem; }
+            .hero-image-wrap { height: 60vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <header class="header">
+        <div class="logo">
+            <img src="image/logo.png" alt="logo" onerror="this.style.display='none'">
+        </div>
+        <nav class="header-nav">
+            <a href="service.html" class="nav-link hover-target">SERVICE</a>
+            <a href="#about" class="nav-link hover-target">ABOUT US</a>
+            <a href="https://www.a9tion.com/contact" class="nav-link hover-target">CONTACT</a>
+            <a href="javascript:void(0)" class="nav-link hover-target" id="lang-switch">EN</a>
+        </nav>
+    </header>
+
+    <div class="hero-section">
+        <div class="hero-image-wrap"></div>
+    </div>
+
+    <section class="container">
+        <div class="message-section">
+            <div class="message-left">
+                <img src="image/ceo.jpg" alt="Founder & CEO Takuji KITAGAWA" class="ceo-img" onerror="this.src='https://via.placeholder.com/600x600?text=CEO+Photo'">
+                <div class="ceo-name">Founder & CEO Takuji KITAGAWA</div>
+            </div>
+            <div class="message-right">
+                <h2 class="message-title">Message</h2>
+                <div id="message-body" class="message-body">
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <section id="about" class="sec">
+            <h2 class="sec-title" id="title-about">ABOUT US</h2>
+            <div class="company-area">
+                <p id="about-text" style="font-size:1.1rem; line-height:2; color: #1a1a1a;"></p>
+                <dl class="co-dl">
+                    <dt class="co-dt">NAME</dt>
+                    <dd class="co-dd" id="about-name"></dd>
+                    <dt class="co-dt">ADDRESS</dt>
+                    <dd class="co-dd" id="about-address"></dd>
+                    <dt class="co-dt">FOUNDED</dt>
+                    <dd class="co-dd">2025.10.31</dd>
+                    <dt class="co-dt">FOUNDER & CEO</dt>
+                    <dd class="co-dd">Takuji KITAGAWA</dd>
+                </dl>
+            </div>
+        </section>
+
+        <footer id="contact">
+            <a href="https://www.a9tion.com/contact" class="f-contact hover-target" id="contact-btn">CONTACT</a>
+            <div class="copyright">
+                &copy; <span id="year"></span> A9tion K.K.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const translations = {
+            ja: {
+                langLabel: "EN",
+                messageBody: `<span class="message-lead">アクションで世界を動かす</span>
+                              <p>a9tion(アクション)は、2つの事業で世界を動かします。まず1つ目は、海外企業が日本市場へ進出する際の最初の一歩を確実に踏み出すために、戦略立案から実行までを一気通貫でサポートします。</p>
+                              <p>そして2つ目は、今までの経験を活かした実店舗やポップアップストアを含む体験型店舗やショールームの立ち上げ・改善・拡大を目指す国内外のブランドの支援です。</p>
+                              <p>お気軽にお問い合わせください。</p>`,
+                aboutLabel: "ABOUT US",
+                contactLabel: "CONTACT",
+                aboutText: "デジタルとアナログの境界線を曖昧にし、<br>新しい価値観を創造するデザインファーム。<br>既存の枠組みにとらわれないアプローチで、<br>ブランドの潜在能力を引き出します。",
+                companyName: "A9tion株式会社",
+                address: "東京都千代田区神田鍛冶町3-3-3 2階"
+            },
+            en: {
+                langLabel: "JP",
+                messageBody: `<span class="message-lead">Moving the World Through Actions</span>
+                              <p>a9tion moves the world through two core businesses. First, we provide end-to-end support from strategy to execution to ensure global companies take a reliable first step into the Japanese market.</p>
+                              <p>Second, we support domestic and international brands aiming to launch, improve, and expand experiential stores and showrooms, leveraging our extensive experience in physical retail and pop-up stores.</p>
+                              <p>Please feel free to contact us.</p>`,
+                aboutLabel: "ABOUT US",
+                contactLabel: "CONTACT",
+                aboutText: "A strategic partner blurring the lines between digital and analog.<br>We unlock brand potential through innovative approaches<br>that challenge existing frameworks.",
+                companyName: "A9tion K.K.",
+                address: "2F, 3-3-3 Kanda Kajicho, Chiyoda-ku, Tokyo"
+            }
+        };
+
+        let currentLang = 'ja';
+
+        function updateContent() {
+            const t = translations[currentLang];
+            document.getElementById('lang-switch').textContent = t.langLabel;
+            document.getElementById('message-body').innerHTML = t.messageBody; 
+            document.getElementById('title-about').textContent = t.aboutLabel;
+            document.getElementById('about-text').innerHTML = t.aboutText;
+            document.getElementById('about-name').textContent = t.companyName;
+            document.getElementById('about-address').textContent = t.address;
+            document.getElementById('contact-btn').textContent = t.contactLabel;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year').textContent = new Date().getFullYear();
+            document.getElementById('lang-switch').addEventListener('click', () => {
+                currentLang = currentLang === 'ja' ? 'en' : 'ja';
+                updateContent();
+            });
+            updateContent(); 
+
+            const dot = document.querySelector('.cursor-dot');
+            const circle = document.querySelector('.cursor-circle');
+            document.addEventListener('mousemove', (e) => {
+                dot.style.left = circle.style.left = e.clientX + 'px';
+                dot.style.top = circle.style.top = e.clientY + 'px';
+            });
+            document.body.addEventListener('mouseover', (e) => {
+                if (e.target.closest('.hover-target') || e.target.tagName === 'A') document.body.classList.add('hovering');
+                else document.body.classList.remove('hovering');
+            });
+        });
+    </script>
+</body>
+</html>
