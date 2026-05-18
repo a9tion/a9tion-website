@@ -200,7 +200,7 @@ const BRANDS  = params.get('brands')
   ? params.get('brands').split(',').map(s => s.trim()).filter(Boolean)
   : ['その他'];
 
-const ENDPOINT_URL = 'YOUR_ENDPOINT_URL'; // Apps Scriptデプロイ後URLに差し替える
+const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbyO3JlAWzhQAI2yvbcREhHcptILJeUlrKtPvlOotaEll2cWN0n2szmpGFZKyywXUfAwCw/exec';
 
 // ヘッダー
 document.getElementById('header-client').textContent = CLIENT;
