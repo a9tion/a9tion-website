@@ -5,308 +5,448 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>フィードバック ダッシュボード | a9tion</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
-      background: #f2f2f7; color: #1c1c1e; min-height: 100vh;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f2f2f7;
+      --surface:   #ffffff;
+      --border:    #e5e5ea;
+      --text:      #1c1c1e;
+      --text-sub:  #8e8e93;
+      --text-mid:  #636366;
+      --accent:    #1c1c1e;
+      --blue:      #007aff;
+      --green:     #34c759;
+      --orange:    #ff9f0a;
+      --purple:    #bf5af2;
+      --red:       #ff3b30;
+      --radius-sm: 8px;
+      --radius:    14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+      --shadow:    0 4px 16px rgba(0,0,0,0.1);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.25);
     }
 
-    /* ---- Auth Screens ---- */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===================== AUTH SCREENS ===================== */
     .auth-screen {
       display: none; min-height: 100vh;
-      align-items: center; justify-content: center; flex-direction: column;
-      gap: 16px; padding: 32px;
+      align-items: center; justify-content: center; padding: 32px;
     }
     .auth-screen.active { display: flex; }
-    .auth-box {
-      background: white; border-radius: 20px; padding: 40px 36px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1); max-width: 380px; width: 100%;
-      text-align: center;
-    }
-    .auth-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #888; margin-bottom: 24px; }
-    .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .auth-sub { font-size: 14px; color: #8e8e93; margin-bottom: 28px; }
-    .pin-input {
-      width: 100%; padding: 14px 16px; border: 2px solid #e5e5ea; border-radius: 12px;
-      font-size: 28px; text-align: center; letter-spacing: 0.3em; font-weight: 700;
-      color: #1c1c1e; background: #fafafa; outline: none; margin-bottom: 16px;
-      -webkit-text-security: disc;
-    }
-    .pin-input:focus { border-color: #007aff; }
-    .auth-btn {
-      width: 100%; padding: 14px; background: #007aff; color: white;
-      border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
-      cursor: pointer; transition: opacity 0.15s;
-    }
-    .auth-btn:hover { opacity: 0.87; }
-    .auth-btn:disabled { opacity: 0.4; cursor: default; }
-    .auth-error {
-      font-size: 14px; color: #ff3b30; font-weight: 600;
-      min-height: 20px; margin-top: 4px;
-    }
-    .denied-icon { font-size: 48px; margin-bottom: 8px; }
 
-    /* ---- Dashboard ---- */
+    .auth-box {
+      background: var(--surface); border-radius: var(--radius-lg); padding: 44px 40px;
+      box-shadow: var(--shadow); max-width: 400px; width: 100%; text-align: center;
+    }
+    .auth-wordmark {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.22em;
+      color: var(--text-sub); text-transform: uppercase; margin-bottom: 32px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .auth-wordmark::before,
+    .auth-wordmark::after {
+      content: ''; flex: 1; height: 1px; background: var(--border); max-width: 60px;
+    }
+    .auth-icon { font-size: 40px; margin-bottom: 16px; }
+    .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .auth-sub { font-size: 14px; color: var(--text-sub); margin-bottom: 32px; line-height: 1.5; }
+
+    .pin-wrap { position: relative; margin-bottom: 12px; }
+    .pin-input {
+      width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius);
+      font-size: 26px; text-align: center; letter-spacing: 0.35em; font-weight: 700;
+      color: var(--text); background: #fafafa; outline: none;
+      -webkit-text-security: disc; transition: border-color 0.15s;
+    }
+    .pin-input:focus { border-color: var(--blue); background: #fff; }
+    .pin-input.error { border-color: var(--red); }
+
+    .auth-error {
+      font-size: 13px; color: var(--red); font-weight: 600;
+      min-height: 18px; margin-bottom: 12px; text-align: center;
+    }
+    .auth-btn {
+      width: 100%; padding: 15px; background: var(--text); color: #fff;
+      border: none; border-radius: var(--radius); font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.03em;
+    }
+    .auth-btn:hover { opacity: 0.82; }
+    .auth-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ===================== TOPBAR ===================== */
     #screen-dashboard { display: none; }
 
     .topbar {
-      background: #1c1c1e; color: white; padding: 0 32px;
-      height: 60px; display: flex; align-items: center; justify-content: space-between;
+      background: var(--text); color: #fff;
+      height: 58px; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
     }
-    .topbar-left { display: flex; align-items: center; gap: 16px; }
-    .topbar-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #888; }
-    .topbar-title { font-size: 18px; font-weight: 700; }
-    .topbar-actions { display: flex; gap: 10px; }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-brand {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.4); text-transform: uppercase;
+    }
+    .topbar-sep { color: rgba(255,255,255,0.2); font-size: 16px; }
+    .topbar-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
     .btn {
-      padding: 8px 16px; border-radius: 8px; border: none;
-      font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+      padding: 7px 14px; border-radius: var(--radius-sm); border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: opacity 0.15s; white-space: nowrap;
     }
-    .btn:hover { opacity: 0.85; }
-    .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: white; }
-    .btn-primary { background: #007aff; color: white; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn:hover { opacity: 0.82; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.1); color: #fff;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-dev {
+      background: rgba(191,90,242,0.18); color: #bf5af2;
+      border: 1px solid rgba(191,90,242,0.3);
+    }
+    .btn-reset {
+      background: #f2f2f7; color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-filter { background: var(--blue); color: #fff; }
 
-    .main { padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+    /* ===================== MAIN LAYOUT ===================== */
+    .main { padding: 24px 28px; max-width: 1360px; margin: 0 auto; }
 
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      gap: 16px; margin-bottom: 24px;
+    /* ===================== STATS ===================== */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 20px;
     }
     .stat-card {
-      background: white; border-radius: 14px; padding: 20px 22px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      background: var(--surface); border-radius: var(--radius); padding: 20px 22px;
+      box-shadow: var(--shadow-sm); border: 1px solid transparent;
+      transition: box-shadow 0.15s;
     }
-    .stat-label { font-size: 12px; color: #8e8e93; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
-    .stat-value { font-size: 36px; font-weight: 700; line-height: 1; }
-    .stat-sub { font-size: 12px; color: #8e8e93; margin-top: 6px; }
-    .stat-card.blue   .stat-value { color: #007aff; }
-    .stat-card.green  .stat-value { color: #34c759; }
-    .stat-card.orange .stat-value { color: #ff9f0a; }
-    .stat-card.purple .stat-value { color: #bf5af2; }
-    .stat-card.teal   .stat-value { color: #5ac8fa; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-icon { font-size: 18px; opacity: 0.7; }
+    .stat-value { font-size: 38px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .stat-sub { font-size: 12px; color: var(--text-sub); }
+    .stat-card.c-blue  .stat-value { color: var(--blue); }
+    .stat-card.c-green .stat-value { color: var(--green); }
+    .stat-card.c-orange .stat-value { color: var(--orange); }
+    .stat-card.c-purple .stat-value { color: var(--purple); }
 
-    .filter-bar {
-      background: white; border-radius: 14px; padding: 18px 22px;
-      margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-      display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    /* ===================== FILTER BAR ===================== */
+    .filter-card {
+      background: var(--surface); border-radius: var(--radius); padding: 18px 22px;
+      box-shadow: var(--shadow-sm); margin-bottom: 16px;
     }
-    .filter-group { display: flex; flex-direction: column; gap: 5px; }
-    .filter-group label { font-size: 11px; color: #8e8e93; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-    .filter-group select,
-    .filter-group input {
-      padding: 9px 12px; border: 1.5px solid #e5e5ea; border-radius: 8px;
-      font-size: 14px; color: #1c1c1e; background: #fafafa;
-      -webkit-appearance: none; min-width: 130px;
+    .filter-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .fg label {
+      font-size: 10px; font-weight: 800; color: var(--text-sub);
+      text-transform: uppercase; letter-spacing: 0.09em;
     }
-    .filter-group select:focus,
-    .filter-group input:focus { outline: none; border-color: #007aff; }
-    .filter-actions { display: flex; gap: 8px; margin-left: auto; align-self: flex-end; }
+    .fg input[type="date"],
+    .fg input[type="text"] {
+      padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 14px; color: var(--text); background: #fafafa;
+      outline: none; min-width: 140px; transition: border-color 0.15s;
+    }
+    .fg input:focus { border-color: var(--blue); background: #fff; }
 
-    .table-wrap {
-      background: white; border-radius: 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07); overflow: hidden;
+    /* --- Custom multi-select dropdown --- */
+    .ms-wrap { position: relative; min-width: 180px; }
+    .ms-btn {
+      width: 100%; padding: 9px 32px 9px 12px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; color: var(--text);
+      background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat calc(100% - 10px) center;
+      cursor: pointer; text-align: left; outline: none;
+      transition: border-color 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .table-header {
-      padding: 16px 22px; border-bottom: 1px solid #f2f2f7;
+    .ms-btn:focus, .ms-btn.open { border-color: var(--blue); background-color: #fff; }
+    .ms-dropdown {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0;
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow); min-width: 100%; max-height: 240px; overflow-y: auto;
+      z-index: 200; padding: 6px 0;
+    }
+    .ms-dropdown.open { display: block; }
+    .ms-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; font-size: 14px; cursor: pointer; transition: background 0.1s;
+      user-select: none;
+    }
+    .ms-item:hover { background: #f5f5f7; }
+    .ms-item input[type="checkbox"] { accent-color: var(--blue); width: 15px; height: 15px; cursor: pointer; }
+    .ms-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    .filter-actions { display: flex; gap: 8px; margin-left: auto; }
+
+    /* ===================== TABLE ===================== */
+    .table-card {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+    }
+    .table-head {
+      padding: 14px 22px; border-bottom: 1px solid var(--bg);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .table-header-title { font-size: 15px; font-weight: 700; }
-    .count-badge {
-      display: inline-block; background: #f2f2f7; color: #636366;
-      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 8px;
+    .table-head-left { display: flex; align-items: center; gap: 10px; }
+    .table-head-title { font-size: 15px; font-weight: 700; }
+    .count-chip {
+      background: var(--bg); color: var(--text-mid);
+      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;
     }
 
     table { width: 100%; border-collapse: collapse; }
     thead th {
-      text-align: left; padding: 12px 20px; font-size: 11px; font-weight: 700;
-      color: #8e8e93; text-transform: uppercase; letter-spacing: 0.06em;
-      border-bottom: 1px solid #f2f2f7; background: #fafafa;
+      text-align: left; padding: 11px 18px; font-size: 10px; font-weight: 800;
+      color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.09em;
+      border-bottom: 1px solid var(--bg); background: #fafafa;
     }
-    tbody tr { border-bottom: 1px solid #f2f2f7; transition: background 0.1s; cursor: pointer; }
+    tbody tr { border-bottom: 1px solid var(--bg); cursor: pointer; transition: background 0.1s; }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #f9f9fb; }
-    tbody td { padding: 14px 20px; font-size: 14px; vertical-align: top; }
+    tbody tr:hover { background: #f7f7fa; }
+    tbody td { padding: 13px 18px; font-size: 14px; vertical-align: top; }
 
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-brand { background: #e8f0fe; color: #1a56db; }
-    .badge-store { background: #f0fdf4; color: #166534; }
+    .chip {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .chip-brand { background: #eff4ff; color: #2563eb; }
+    .chip-store { background: #f0fdf4; color: #15803d; }
 
-    .feedback-text { max-width: 420px; color: #3a3a3c; line-height: 1.55; }
-    .feedback-text.collapsed {
+    .dt-main { font-size: 13px; font-weight: 600; color: var(--text); }
+    .dt-sub   { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+    .fb-text { max-width: 440px; color: #3a3a3c; line-height: 1.6; }
+    .fb-text.clamp {
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
-    .datetime { color: #8e8e93; font-size: 13px; }
-    .staff-name { color: #636366; font-size: 13px; }
+    .staff-cell { font-size: 13px; color: var(--text-mid); }
 
-    .empty-state { text-align: center; padding: 60px 20px; color: #8e8e93; }
-    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-    .empty-state p { font-size: 15px; }
-    .empty-state small { font-size: 13px; display: block; margin-top: 6px; }
+    .empty-state {
+      text-align: center; padding: 72px 20px; color: var(--text-sub);
+    }
+    .empty-state .e-icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-state .e-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .empty-state .e-sub   { font-size: 13px; }
 
-    .modal-overlay {
+    /* ===================== LOADING ===================== */
+    .loading-row td {
+      padding: 16px 18px;
+    }
+    .skel {
+      height: 14px; border-radius: 6px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ===================== MODAL ===================== */
+    .overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.45); z-index: 300;
+      align-items: center; justify-content: center; padding: 20px;
     }
-    .modal-overlay.open { display: flex; }
+    .overlay.open { display: flex; }
     .modal {
-      background: white; border-radius: 16px; padding: 28px;
-      max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      background: var(--surface); border-radius: var(--radius-lg); padding: 30px;
+      max-width: 580px; width: 100%; max-height: 85vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
     }
-    .modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .modal-feedback { font-size: 16px; line-height: 1.7; color: #1c1c1e; white-space: pre-wrap; margin-bottom: 20px; }
+    .modal-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .modal-meta { font-size: 13px; color: var(--text-sub); margin-bottom: 18px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .modal-text {
+      font-size: 16px; line-height: 1.75; color: var(--text); white-space: pre-wrap;
+      background: #fafafa; border-radius: var(--radius); padding: 18px 20px;
+      margin-bottom: 22px; border: 1px solid var(--border);
+    }
     .modal-close {
-      width: 100%; padding: 12px; background: #f2f2f7; border: none;
-      border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: #1c1c1e;
+      width: 100%; padding: 13px; background: var(--bg); border: none;
+      border-radius: var(--radius); font-size: 15px; font-weight: 700;
+      cursor: pointer; color: var(--text); transition: background 0.15s;
     }
-    .modal-close:hover { background: #e5e5ea; }
+    .modal-close:hover { background: var(--border); }
 
+    /* ===================== RESPONSIVE ===================== */
     @media (max-width: 1024px) {
-      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 700px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .main { padding: 20px 16px; }
+    @media (max-width: 680px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .main { padding: 16px; }
       .topbar { padding: 0 16px; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .fg, .ms-wrap { min-width: unset; width: 100%; }
+      .filter-actions { margin-left: 0; }
     }
   </style>
 </head>
 <body>
 
-<!-- アクセス拒否画面（tokenなし） -->
+<!-- ===================== ACCESS DENIED ===================== -->
 <div class="auth-screen" id="screen-denied">
   <div class="auth-box">
-    <div class="auth-logo">a9tion</div>
-    <div class="denied-icon">🔒</div>
+    <div class="auth-wordmark">a9tion</div>
+    <div class="auth-icon">🔒</div>
     <div class="auth-title">アクセス権限がありません</div>
-    <div class="auth-sub">正しいURLからアクセスしてください。</div>
+    <div class="auth-sub">正しいURLからアクセスしてください。<br>URLにtokenパラメータが含まれているか確認してください。</div>
   </div>
 </div>
 
-<!-- PIN入力画面 -->
+<!-- ===================== PIN ENTRY ===================== -->
 <div class="auth-screen" id="screen-pin">
   <div class="auth-box">
-    <div class="auth-logo">a9tion</div>
+    <div class="auth-wordmark">a9tion</div>
+    <div class="auth-icon">📊</div>
     <div class="auth-title">ダッシュボード</div>
     <div class="auth-sub">PINコードを入力してください</div>
-    <input
-      class="pin-input" type="password" id="pin-input"
-      inputmode="numeric" maxlength="6" autocomplete="off"
-      placeholder="••••••"
-    >
+    <div class="pin-wrap">
+      <input class="pin-input" type="password" id="pin-input"
+        inputmode="numeric" maxlength="6" autocomplete="off" placeholder="• • • • • •">
+    </div>
     <div class="auth-error" id="pin-error"></div>
     <button class="auth-btn" id="pin-submit" onclick="submitPin()">ログイン</button>
   </div>
 </div>
 
-<!-- ダッシュボード本体 -->
+<!-- ===================== DASHBOARD ===================== -->
 <div id="screen-dashboard">
 
   <div class="topbar">
     <div class="topbar-left">
-      <span class="topbar-logo">a9tion</span>
-      <span class="topbar-title" id="dashboard-title">フィードバック ダッシュボード</span>
+      <span class="topbar-brand">a9tion</span>
+      <span class="topbar-sep">/</span>
+      <span class="topbar-title" id="dashboard-title">フィードバック</span>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-primary btn-sm" onclick="exportCSV()">CSVエクスポート</button>
+      <button class="btn btn-dev" id="btn-sample" style="display:none" onclick="addSampleData()">+ サンプルデータ</button>
+      <button class="btn btn-ghost" onclick="exportCSV()">CSVエクスポート</button>
     </div>
   </div>
 
   <div class="main">
 
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">総件数</div>
-        <div class="stat-value" id="stat-total">0</div>
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card c-blue">
+        <div class="stat-header">
+          <span class="stat-label">総件数</span>
+          <span class="stat-icon">📝</span>
+        </div>
+        <div class="stat-value" id="stat-total">—</div>
         <div class="stat-sub">全期間</div>
       </div>
-      <div class="stat-card green">
-        <div class="stat-label">今日</div>
-        <div class="stat-value" id="stat-today">0</div>
+      <div class="stat-card c-green">
+        <div class="stat-header">
+          <span class="stat-label">今日</span>
+          <span class="stat-icon">📅</span>
+        </div>
+        <div class="stat-value" id="stat-today">—</div>
         <div class="stat-sub" id="stat-today-date">—</div>
       </div>
-      <div class="stat-card orange">
-        <div class="stat-label">今週</div>
-        <div class="stat-value" id="stat-week">0</div>
+      <div class="stat-card c-orange">
+        <div class="stat-header">
+          <span class="stat-label">今週</span>
+          <span class="stat-icon">📈</span>
+        </div>
+        <div class="stat-value" id="stat-week">—</div>
         <div class="stat-sub">直近7日間</div>
       </div>
-      <div class="stat-card purple">
-        <div class="stat-label">ブランド数</div>
-        <div class="stat-value" id="stat-brands">0</div>
+      <div class="stat-card c-purple">
+        <div class="stat-header">
+          <span class="stat-label">ブランド数</span>
+          <span class="stat-icon">🏷️</span>
+        </div>
+        <div class="stat-value" id="stat-brands">—</div>
         <div class="stat-sub">登録済み</div>
       </div>
-      <div class="stat-card teal">
-        <div class="stat-label">スタッフ数</div>
-        <div class="stat-value" id="stat-staffs">0</div>
-        <div class="stat-sub">入力済み</div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-card">
+      <div class="filter-row">
+        <div class="fg">
+          <label>期間（開始）</label>
+          <input type="date" id="filter-from">
+        </div>
+        <div class="fg">
+          <label>期間（終了）</label>
+          <input type="date" id="filter-to">
+        </div>
+        <div class="fg">
+          <label>ブランド</label>
+          <div class="ms-wrap" id="ms-wrap">
+            <button class="ms-btn" id="ms-btn" onclick="toggleMsDropdown()">すべて</button>
+            <div class="ms-dropdown" id="ms-dropdown">
+              <label class="ms-item" id="ms-all-item">
+                <input type="checkbox" id="ms-all" onchange="onAllChange()"> すべて
+              </label>
+              <div class="ms-divider"></div>
+              <div id="ms-options"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fg" style="flex:1; min-width:160px;">
+          <label>フリーワード</label>
+          <input type="text" id="filter-search" placeholder="キーワードで検索...">
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-filter" onclick="applyFilter()">絞り込む</button>
+          <button class="btn btn-reset" onclick="resetFilter()">リセット</button>
+        </div>
       </div>
     </div>
 
-    <div class="filter-bar">
-      <div class="filter-group">
-        <label>期間（開始）</label>
-        <input type="date" id="filter-from">
-      </div>
-      <div class="filter-group">
-        <label>期間（終了）</label>
-        <input type="date" id="filter-to">
-      </div>
-      <div class="filter-group">
-        <label>ブランド</label>
-        <select id="filter-brand">
-          <option value="">すべて</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>スタッフ</label>
-        <select id="filter-staff">
-          <option value="">すべて</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>フリーワード</label>
-        <input type="text" id="filter-search" placeholder="キーワードで検索...">
-      </div>
-      <div class="filter-actions">
-        <button class="btn btn-primary" onclick="applyFilter()">絞り込む</button>
-        <button class="btn btn-outline" style="background:#f2f2f7;color:#1c1c1e;border:none" onclick="resetFilter()">リセット</button>
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <div class="table-header">
-        <div>
-          <span class="table-header-title">フィードバック一覧</span>
-          <span class="count-badge" id="result-count">0件</span>
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-head">
+        <div class="table-head-left">
+          <span class="table-head-title">フィードバック一覧</span>
+          <span class="count-chip" id="result-count">—</span>
         </div>
       </div>
       <table>
         <thead>
           <tr>
-            <th style="width:120px">日時</th>
-            <th style="width:120px">店舗</th>
-            <th style="width:120px">ブランド</th>
+            <th style="width:110px">日時</th>
+            <th style="width:110px">店舗</th>
+            <th style="width:130px">ブランド</th>
             <th>フィードバック内容</th>
             <th style="width:90px">スタッフ</th>
           </tr>
         </thead>
-        <tbody id="table-body"></tbody>
+        <tbody id="table-body">
+          <tr class="loading-row"><td colspan="5"><div class="skel" style="width:60%"></div></td></tr>
+          <tr class="loading-row"><td colspan="5"><div class="skel" style="width:75%"></div></td></tr>
+          <tr class="loading-row"><td colspan="5"><div class="skel" style="width:50%"></div></td></tr>
+        </tbody>
       </table>
       <div id="empty-state" class="empty-state" style="display:none">
-        <div class="icon">📋</div>
-        <p>フィードバックがありません</p>
-        <small>店員ページから音声入力してください</small>
+        <div class="e-icon">📋</div>
+        <div class="e-title">フィードバックがありません</div>
+        <div class="e-sub">条件を変えて再度お試しください</div>
       </div>
     </div>
 
   </div>
 </div>
 
-<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+<!-- MODAL -->
+<div class="overlay" id="modal" onclick="closeModal(event)">
   <div class="modal">
+    <div class="modal-chips" id="modal-chips"></div>
     <div class="modal-meta" id="modal-meta"></div>
-    <div class="modal-feedback" id="modal-text"></div>
+    <div class="modal-text" id="modal-text"></div>
     <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">閉じる</button>
   </div>
 </div>
@@ -314,63 +454,66 @@
 <script>
 const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbyO3JlAWzhQAI2yvbcREhHcptILJeUlrKtPvlOotaEll2cWN0n2szmpGFZKyywXUfAwCw/exec';
 
-const params = new URLSearchParams(location.search);
-const TOKEN  = params.get('token') || '';
-let   _pin   = '';
+const urlParams = new URLSearchParams(location.search);
+const TOKEN     = urlParams.get('token') || '';
+const DEV_MODE  = urlParams.get('dev') === '1';
+let   _pin      = '';
+let   _clientId = '';
 
-// --- 起動時: tokenの有無でどの画面を出すか決める ---
-(function init() {
-  if (!TOKEN) {
-    document.getElementById('screen-denied').classList.add('active');
-    return;
-  }
+// ===================== AUTH =====================
+(function boot() {
+  if (!TOKEN) { document.getElementById('screen-denied').classList.add('active'); return; }
   document.getElementById('screen-pin').classList.add('active');
-  const input = document.getElementById('pin-input');
-  input.focus();
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
+  const inp = document.getElementById('pin-input');
+  inp.focus();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
 })();
 
-// --- PIN認証 ---
 async function submitPin() {
   const pin = document.getElementById('pin-input').value.trim();
   if (!pin) return;
-
-  const btn = document.getElementById('pin-submit');
+  const btn   = document.getElementById('pin-submit');
   const errEl = document.getElementById('pin-error');
-  btn.disabled = true;
-  btn.textContent = '確認中...';
-  errEl.textContent = '';
+  const inp   = document.getElementById('pin-input');
+  btn.disabled = true; btn.textContent = '確認中...';
+  errEl.textContent = ''; inp.classList.remove('error');
 
   try {
     const res  = await fetch(`${ENDPOINT_URL}?action=auth&token=${encodeURIComponent(TOKEN)}&pin=${encodeURIComponent(pin)}`);
     const json = await res.json();
-
     if (json.success) {
-      _pin = pin;
+      _pin      = pin;
+      _clientId = json.client_id || 'client';
       document.getElementById('screen-pin').classList.remove('active');
       document.getElementById('screen-dashboard').style.display = 'block';
       document.getElementById('dashboard-title').textContent = json.display_name + ' — フィードバック';
+      if (DEV_MODE) document.getElementById('btn-sample').style.display = 'inline-block';
       loadDashboard();
     } else {
       errEl.textContent = 'PINが正しくありません';
-      btn.disabled = false;
-      btn.textContent = 'ログイン';
-      document.getElementById('pin-input').value = '';
-      document.getElementById('pin-input').focus();
+      inp.classList.add('error'); inp.value = ''; inp.focus();
+      btn.disabled = false; btn.textContent = 'ログイン';
     }
-  } catch (err) {
-    errEl.textContent = '通信エラーが発生しました';
-    btn.disabled = false;
-    btn.textContent = 'ログイン';
+  } catch {
+    errEl.textContent = '通信エラーが発生しました。しばらく後に再試行してください。';
+    btn.disabled = false; btn.textContent = 'ログイン';
   }
 }
 
-// --- データ取得 ---
-async function loadData() {
+// ===================== DATA =====================
+async function fetchData() {
   const res = await fetch(`${ENDPOINT_URL}?token=${encodeURIComponent(TOKEN)}&pin=${encodeURIComponent(_pin)}`);
-  return await res.json();
+  const json = await res.json();
+  if (Array.isArray(json)) return json;
+  if (json.error) throw new Error(json.error);
+  return [];
 }
 
+let _allData      = [];
+let _filteredData = [];
+let _selectedBrands = new Set(); // empty = all
+
+// ===================== STATS =====================
 function todayStr() {
   const n = new Date();
   return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
@@ -378,38 +521,118 @@ function todayStr() {
 
 function updateStats(data) {
   const today   = todayStr();
-  const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
-  document.getElementById('stat-total').textContent  = data.length;
-  document.getElementById('stat-today').textContent  = data.filter(d => d.date === today).length;
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  document.getElementById('stat-total').textContent   = data.length;
+  document.getElementById('stat-today').textContent   = data.filter(d => d.date === today).length;
   document.getElementById('stat-today-date').textContent = today;
-  document.getElementById('stat-week').textContent   = data.filter(d => new Date(d.createdAt) >= weekAgo).length;
-  document.getElementById('stat-brands').textContent = new Set(data.map(d => d.brand)).size;
-  document.getElementById('stat-staffs').textContent = new Set(data.map(d => d.staff).filter(s => s && s !== '—')).size;
+  document.getElementById('stat-week').textContent    = data.filter(d => new Date(d.createdAt) >= weekAgo).length;
+  document.getElementById('stat-brands').textContent  = new Set(data.map(d => d.brand).filter(Boolean)).size;
 }
 
-function populateFilters(data) {
-  const brands = [...new Set(data.map(d => d.brand))].sort();
-  const staffs = [...new Set(data.map(d => d.staff).filter(s => s && s !== '—'))].sort();
-
-  const brandSel = document.getElementById('filter-brand');
-  const curBrand = brandSel.value;
-  brandSel.innerHTML = '<option value="">すべて</option>';
+// ===================== MULTI-SELECT DROPDOWN =====================
+function buildBrandDropdown(data) {
+  const brands = [...new Set(data.map(d => d.brand).filter(Boolean))].sort();
+  const container = document.getElementById('ms-options');
+  container.innerHTML = '';
   brands.forEach(b => {
-    const opt = document.createElement('option');
-    opt.value = b; opt.textContent = b;
-    if (b === curBrand) opt.selected = true;
-    brandSel.appendChild(opt);
+    const lbl = document.createElement('label');
+    lbl.className = 'ms-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = b;
+    cb.onchange = onBrandChange;
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(b));
+    container.appendChild(lbl);
   });
+  updateAllCheckbox();
+  updateMsBtn();
+}
 
-  const staffSel = document.getElementById('filter-staff');
-  const curStaff = staffSel.value;
-  staffSel.innerHTML = '<option value="">すべて</option>';
-  staffs.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
-    if (s === curStaff) opt.selected = true;
-    staffSel.appendChild(opt);
+function toggleMsDropdown() {
+  const dd  = document.getElementById('ms-dropdown');
+  const btn = document.getElementById('ms-btn');
+  const open = dd.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('ms-wrap').contains(e.target)) {
+    document.getElementById('ms-dropdown').classList.remove('open');
+    document.getElementById('ms-btn').classList.remove('open');
+  }
+});
+
+function onAllChange() {
+  const checked = document.getElementById('ms-all').checked;
+  document.querySelectorAll('#ms-options input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
+  _selectedBrands = new Set();
+  updateMsBtn();
+}
+
+function onBrandChange() {
+  const all = document.querySelectorAll('#ms-options input[type="checkbox"]');
+  _selectedBrands = new Set([...all].filter(cb => cb.checked).map(cb => cb.value));
+  updateAllCheckbox();
+  updateMsBtn();
+}
+
+function updateAllCheckbox() {
+  const all  = document.querySelectorAll('#ms-options input[type="checkbox"]');
+  const any  = [...all].some(cb => cb.checked);
+  const every = [...all].every(cb => cb.checked) || all.length === 0;
+  const allCb = document.getElementById('ms-all');
+  allCb.checked = every;
+  allCb.indeterminate = any && !every;
+  if (every) _selectedBrands = new Set();
+}
+
+function updateMsBtn() {
+  const btn = document.getElementById('ms-btn');
+  const n   = _selectedBrands.size;
+  btn.textContent = n === 0 ? 'すべて' : `${n}件選択中`;
+}
+
+// ===================== FILTER =====================
+function applyFilter() {
+  const from   = document.getElementById('filter-from').value;
+  const to     = document.getElementById('filter-to').value;
+  const search = document.getElementById('filter-search').value.toLowerCase().trim();
+
+  _filteredData = _allData.filter(d => {
+    if (from && d.date < from) return false;
+    if (to   && d.date > to)   return false;
+    if (_selectedBrands.size > 0 && !_selectedBrands.has(d.brand)) return false;
+    if (search &&
+        !d.feedback.toLowerCase().includes(search) &&
+        !d.brand.toLowerCase().includes(search) &&
+        !d.staff.toLowerCase().includes(search) &&
+        !d.store.toLowerCase().includes(search)) return false;
+    return true;
   });
+  renderTable(_filteredData);
+}
+
+function resetFilter() {
+  document.getElementById('filter-from').value  = '';
+  document.getElementById('filter-to').value    = '';
+  document.getElementById('filter-search').value = '';
+  document.querySelectorAll('#ms-options input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  document.getElementById('ms-all').checked = true;
+  document.getElementById('ms-all').indeterminate = false;
+  _selectedBrands = new Set();
+  updateMsBtn();
+  _filteredData = _allData.slice();
+  renderTable(_filteredData);
+}
+
+// live search
+document.getElementById('filter-search').addEventListener('input', applyFilter);
+
+// ===================== TABLE =====================
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function renderTable(data) {
@@ -425,96 +648,105 @@ function renderTable(data) {
   empty.style.display = 'none';
 
   tbody.innerHTML = data.slice().reverse().map(entry => `
-    <tr onclick='openModal(${JSON.stringify(entry).replace(/'/g, "&#39;")})'>
+    <tr onclick='openModal(${JSON.stringify(entry).replace(/'/g,"&#39;")})'>
       <td>
-        <div class="datetime">${entry.date}</div>
-        <div class="datetime">${entry.time}</div>
+        <div class="dt-main">${escHtml(entry.date)}</div>
+        <div class="dt-sub">${escHtml(entry.time)}</div>
       </td>
-      <td><span class="badge badge-store">${escHtml(entry.store)}</span></td>
-      <td><span class="badge badge-brand">${escHtml(entry.brand)}</span></td>
-      <td><div class="feedback-text collapsed">${escHtml(entry.feedback)}</div></td>
-      <td><span class="staff-name">${escHtml(entry.staff)}</span></td>
-    </tr>
-  `).join('');
+      <td><span class="chip chip-store">${escHtml(entry.store)}</span></td>
+      <td><span class="chip chip-brand">${escHtml(entry.brand)}</span></td>
+      <td><div class="fb-text clamp">${escHtml(entry.feedback)}</div></td>
+      <td><span class="staff-cell">${escHtml(entry.staff)}</span></td>
+    </tr>`).join('');
 }
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-let _cachedData = [];
-
-function applyFilter() {
-  const from   = document.getElementById('filter-from').value;
-  const to     = document.getElementById('filter-to').value;
-  const brand  = document.getElementById('filter-brand').value;
-  const staff  = document.getElementById('filter-staff').value;
-  const search = document.getElementById('filter-search').value.toLowerCase();
-
-  const filtered = _cachedData.filter(d => {
-    if (from  && d.date < from) return false;
-    if (to    && d.date > to)   return false;
-    if (brand && d.brand !== brand) return false;
-    if (staff && d.staff !== staff) return false;
-    if (search && !d.feedback.toLowerCase().includes(search)
-               && !d.brand.toLowerCase().includes(search)
-               && !d.staff.toLowerCase().includes(search)) return false;
-    return true;
-  });
-  renderTable(filtered);
-}
-
-function resetFilter() {
-  ['filter-from','filter-to','filter-brand','filter-staff','filter-search']
-    .forEach(id => { document.getElementById(id).value = ''; });
-  renderTable(_cachedData);
-}
-
+// ===================== MODAL =====================
 function openModal(entry) {
+  document.getElementById('modal-chips').innerHTML = `
+    <span class="chip chip-store">${escHtml(entry.store)}</span>
+    <span class="chip chip-brand">${escHtml(entry.brand)}</span>`;
   document.getElementById('modal-meta').innerHTML = `
-    <span class="badge badge-store">${escHtml(entry.store)}</span>
-    <span class="badge badge-brand">${escHtml(entry.brand)}</span>
-    <span style="font-size:13px;color:#8e8e93">${entry.date} ${entry.time}</span>
-    <span style="font-size:13px;color:#8e8e93">担当：${escHtml(entry.staff)}</span>
-  `;
+    <span>🕐 ${escHtml(entry.date)} ${escHtml(entry.time)}</span>
+    <span>👤 担当：${escHtml(entry.staff)}</span>`;
   document.getElementById('modal-text').textContent = entry.feedback;
   document.getElementById('modal').classList.add('open');
 }
 
 function closeModal(e) {
-  if (e.target === document.getElementById('modal')) {
+  if (e.target === document.getElementById('modal'))
     document.getElementById('modal').classList.remove('open');
-  }
+}
+
+// ===================== CSV EXPORT =====================
+function todayCompact() {
+  return todayStr().replace(/-/g, '');
 }
 
 function exportCSV() {
-  if (_cachedData.length === 0) { alert('エクスポートするデータがありません'); return; }
+  const data = _filteredData.length ? _filteredData : _allData;
+  if (data.length === 0) { alert('エクスポートするデータがありません'); return; }
   const header = ['ID','日付','時刻','店舗','ブランド','スタッフ','フィードバック'];
-  const rows = _cachedData.map(d => [
+  const rows   = data.map(d => [
     d.id, d.date, d.time, d.store, d.brand, d.staff,
-    '"' + d.feedback.replace(/"/g,'""') + '"'
+    '"' + String(d.feedback).replace(/"/g,'""') + '"'
   ]);
   const csv = '﻿' + [header, ...rows].map(r => r.join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `a9tion_feedback_${todayStr()}.csv`;
+  a.download = `${_clientId}_feedback_${todayCompact()}.csv`;
   a.click();
 }
 
-document.getElementById('filter-search').addEventListener('input', applyFilter);
-document.getElementById('filter-brand').addEventListener('change', applyFilter);
-document.getElementById('filter-staff').addEventListener('change', applyFilter);
+// ===================== SAMPLE DATA (DEV) =====================
+const _sampleBrands = ['ACME Japan', 'Studio Kinoko', 'Blue Marble', 'Hana Living'];
+const _sampleStores = ['渋谷店', '新宿店', '表参道店'];
+const _sampleStaff  = ['田中', '鈴木', '佐藤', '山本'];
+const _sampleTexts  = [
+  '商品の使い方がわからないとおっしゃっていました。パッケージに日本語の説明があると良いとのことです。',
+  'パッケージデザインがとてもおしゃれで購入を決めたとのこと。',
+  '価格が少し高めとのご意見。定期購入の割引があると嬉しいとのこと。',
+  '色のバリエーションをもっと増やしてほしいとのリクエストがありました。',
+  'スタッフの対応がとても良かったとお褒めの言葉をいただきました。',
+  '他の店舗でも取り扱いをしてほしいとのご要望でした。'
+];
 
+function addSampleData() {
+  const now = new Date();
+  const newEntries = Array.from({length: 5}, (_, i) => {
+    const d = new Date(now - i * 3600000 * Math.random() * 48);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return {
+      id:        'DEV-' + Math.random().toString(36).slice(2,8).toUpperCase(),
+      date:      dateStr,
+      time:      timeStr,
+      store:     _sampleStores[Math.floor(Math.random()*_sampleStores.length)],
+      brand:     _sampleBrands[Math.floor(Math.random()*_sampleBrands.length)],
+      staff:     _sampleStaff[Math.floor(Math.random()*_sampleStaff.length)],
+      feedback:  _sampleTexts[Math.floor(Math.random()*_sampleTexts.length)],
+      createdAt: d.getTime(),
+    };
+  });
+  _allData = [..._allData, ...newEntries];
+  updateStats(_allData);
+  buildBrandDropdown(_allData);
+  _filteredData = _allData.slice();
+  renderTable(_filteredData);
+}
+
+// ===================== INIT =====================
 async function loadDashboard() {
-  document.getElementById('result-count').textContent = '読込中...';
   try {
-    _cachedData = await loadData();
-    updateStats(_cachedData);
-    populateFilters(_cachedData);
-    renderTable(_cachedData);
+    _allData = await fetchData();
+    _filteredData = _allData.slice();
+    updateStats(_allData);
+    buildBrandDropdown(_allData);
+    renderTable(_filteredData);
   } catch (err) {
-    console.error('データ取得エラー:', err);
     document.getElementById('result-count').textContent = 'エラー';
+    document.getElementById('table-body').innerHTML =
+      '<tr><td colspan="5" style="text-align:center;padding:40px;color:#ff3b30">データの取得に失敗しました</td></tr>';
+    console.error(err);
   }
 }
 </script>
