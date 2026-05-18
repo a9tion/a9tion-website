@@ -83,13 +83,13 @@ function doGet(e) {
     if (!token || !pin) return jsonOut_({ success: false });
     const client = getClientByToken_(ss, token);
     if (!client || client.pin !== pin) return jsonOut_({ success: false });
-    return jsonOut_({ success: true, display_name: client.displayName });
+    return jsonOut_({ success: true, display_name: client.displayName, client_id: client.clientId });
   }
 
   // --- フィードバックデータ取得 ---
-  if (!token || !pin) return jsonOut_({ error: 'token and pin required' });
+  if (!token || !pin) return jsonOut_({ success: false, error: '認証失敗' });
   const client = getClientByToken_(ss, token);
-  if (!client || client.pin !== pin) return jsonOut_({ error: 'unauthorized' });
+  if (!client || client.pin !== pin) return jsonOut_({ success: false, error: '認証失敗' });
 
   const sheetName = 'feedback_' + client.clientId;
   const sheet = ss.getSheetByName(sheetName);
