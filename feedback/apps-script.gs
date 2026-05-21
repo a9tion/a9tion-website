@@ -13,6 +13,13 @@
 //   daily_ops_{id}     : date | store | <field_key列...>
 // ============================================================
 
+function formatDate_(val) {
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return String(val);
+}
+
 function getClientByToken_(ss, token) {
   const sheet = ss.getSheetByName('clients');
   if (!sheet || sheet.getLastRow() <= 1) return null;
@@ -177,16 +184,18 @@ function doGet(e) {
     const rows    = sheet.getDataRange().getValues();
     const headers = rows[0].map(h => String(h));
     const data = rows.slice(1)
+      .map(r => {
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = (h === 'date') ? formatDate_(r[i]) : (r[i] !== undefined ? r[i] : '');
+        });
+        return obj;
+      })
       .filter(r => {
-        const date = String(r[0]);
+        const date = r.date;
         if (from && date < from) return false;
         if (to   && date > to)   return false;
         return true;
-      })
-      .map(r => {
-        const obj = {};
-        headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? r[i] : ''; });
-        return obj;
       });
 
     return ContentService
@@ -208,7 +217,7 @@ function doGet(e) {
   const rows = sheet.getDataRange().getValues();
   const data = rows.slice(1).map(row => ({
     id:        String(row[0]),
-    date:      String(row[1]),
+    date:      formatDate_(row[1]),
     time:      String(row[2]),
     store:     String(row[3]),
     brand:     String(row[4]),
