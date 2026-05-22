@@ -444,9 +444,35 @@ let _metricDefs  = [];
 let _allOps      = [];
 let _filteredOps = [];
 
+// ====== SESSION (30分TTL) ======
+const SESSION_KEY = 'a9tion_dash_' + TOKEN.slice(0, 8);
+const SESSION_TTL = 30 * 60 * 1000;
+
+function loadSession() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+    if (!s || Date.now() - s.ts > SESSION_TTL) { sessionStorage.removeItem(SESSION_KEY); return null; }
+    return s;
+  } catch { return null; }
+}
+function saveSession(pin, clientId, displayName) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ pin, clientId, displayName, ts: Date.now() }));
+}
+
+function showDashboard(pin, clientId, displayName) {
+  _pin = pin; _clientId = clientId;
+  document.getElementById('screen-pin').classList.remove('active');
+  document.getElementById('screen-dashboard').style.display = 'block';
+  document.getElementById('dashboard-title').textContent = displayName + ' — フィードバック';
+  if (DEV_MODE) document.getElementById('btn-sample').style.display = 'inline-block';
+  loadDashboard();
+}
+
 // ====== AUTH ======
 (function boot() {
   if (!TOKEN) { document.getElementById('screen-denied').classList.add('active'); return; }
+  const s = loadSession();
+  if (s) { showDashboard(s.pin, s.clientId, s.displayName); return; }
   document.getElementById('screen-pin').classList.add('active');
   const inp = document.getElementById('pin-input');
   inp.focus();
@@ -465,12 +491,8 @@ async function submitPin() {
     const res  = await fetch(`${ENDPOINT_URL}?action=auth&token=${enc(TOKEN)}&pin=${enc(pin)}`);
     const json = await res.json();
     if (json.success) {
-      _pin = pin; _clientId = json.client_id || 'client';
-      document.getElementById('screen-pin').classList.remove('active');
-      document.getElementById('screen-dashboard').style.display = 'block';
-      document.getElementById('dashboard-title').textContent = json.display_name + ' — フィードバック';
-      if (DEV_MODE) document.getElementById('btn-sample').style.display = 'inline-block';
-      loadDashboard();
+      saveSession(pin, json.client_id || 'client', json.display_name);
+      showDashboard(pin, json.client_id || 'client', json.display_name);
     } else {
       errEl.textContent = 'PINが正しくありません';
       inp.classList.add('error'); inp.value = ''; inp.focus();

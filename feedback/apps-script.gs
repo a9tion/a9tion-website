@@ -20,6 +20,13 @@ function formatDate_(val) {
   return String(val);
 }
 
+function formatTime_(val) {
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
+  }
+  return String(val);
+}
+
 function getClientByToken_(ss, token) {
   const sheet = ss.getSheetByName('clients');
   if (!sheet || sheet.getLastRow() <= 1) return null;
@@ -218,7 +225,7 @@ function doGet(e) {
   const data = rows.slice(1).map(row => ({
     id:        String(row[0]),
     date:      formatDate_(row[1]),
-    time:      String(row[2]),
+    time:      formatTime_(row[2]),
     store:     String(row[3]),
     brand:     String(row[4]),
     staff:     String(row[5]),
