@@ -514,6 +514,27 @@ function todayStr() {
   return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
 }
 function todayCompact() { return todayStr().replace(/-/g,''); }
+function formatDateTime(dateVal, timeVal) {
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return '—';
+    const y  = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const dy = String(d.getDate()).padStart(2, '0');
+    const tStr = String(timeVal || '');
+    const simple = tStr.match(/^(\d{1,2}):(\d{2})/);
+    let h, min;
+    if (simple) {
+      h = simple[1].padStart(2, '0'); min = simple[2];
+    } else {
+      const t = new Date(tStr);
+      if (isNaN(t.getTime())) return '—';
+      h = String(t.getHours()).padStart(2, '0');
+      min = String(t.getMinutes()).padStart(2, '0');
+    }
+    return `${y}/${mo}/${dy} ${h}:${min}`;
+  } catch { return '—'; }
+}
 
 // ====== DATA FETCH ======
 async function fetchFeedback() {
@@ -663,7 +684,7 @@ function renderFbTable(data) {
   empty.style.display = 'none';
   tbody.innerHTML = data.slice().reverse().map(entry => `
     <tr onclick='openFbModal(${JSON.stringify(entry).replace(/'/g,"&#39;")})'>
-      <td><div class="dt-main">${escHtml(entry.date)}</div><div class="dt-sub">${escHtml(entry.time)}</div></td>
+      <td><div class="dt-main">${escHtml(formatDateTime(entry.date, entry.time))}</div></td>
       <td><span class="chip chip-store">${escHtml(entry.store)}</span></td>
       <td><span class="chip chip-brand">${escHtml(entry.brand)}</span></td>
       <td><div class="fb-text clamp">${escHtml(entry.feedback)}</div></td>
@@ -677,7 +698,7 @@ function openFbModal(entry) {
     <span class="chip chip-store">${escHtml(entry.store)}</span>
     <span class="chip chip-brand">${escHtml(entry.brand)}</span>`;
   document.getElementById('modal-meta').innerHTML = `
-    <span>🕐 ${escHtml(entry.date)} ${escHtml(entry.time)}</span>
+    <span>🕐 ${escHtml(formatDateTime(entry.date, entry.time))}</span>
     <span>👤 担当：${escHtml(entry.staff)}</span>`;
   document.getElementById('modal-text').textContent = entry.feedback;
   document.getElementById('modal-fb').classList.add('open');
