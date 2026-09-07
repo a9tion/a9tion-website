@@ -22,12 +22,34 @@
 
 ## クライアント別ダッシュボードURL一覧
 
-### Makuake Blueprint Lab
+### さわれるMakuake
 
 ```
 URL: https://a9tion.com/feedback/dashboard.html?token=kT9mP3xR7qN2vH5wL8jC4bF6yD1aZeQs
 PIN: 739205
 ```
+
+---
+
+## 本番運用への切り替え（手動作業・Sheets側）
+
+コード変更（`さわれるMakuake`表記・スタッフ入力欄削除・スタッフPIN変更）に加えて、以下はGoogle Sheets側で手動対応が必要。
+
+### 1. `clients` シートの display_name を変更
+
+1. Google Sheets を開き、`clients` シートを選択
+2. `client_id` が `makuake` の行を探す
+3. `display_name` 列の値を `Makuake Blueprint Lab` → `さわれるMakuake` に書き換える
+4. Apps Scriptの再デプロイは不要（`display_name` はSheetsから都度読み込まれるため）
+
+### 2. `feedback_makuake` シートのテストデータを削除
+
+1. `feedback_makuake` シートを開く
+2. 1行目のヘッダー行（`id | 日付 | 時刻 | 店舗 | ブランド | スタッフ | フィードバック | createdAt`）は残す
+3. 2行目以降のテスト投稿データを選択し、行ごと削除（右クリック → 行を削除）
+4. ヘッダー行だけが残っている状態にして保存
+
+> 本番投入前にダッシュボード（`dashboard.html`）を開き、件数が0件になっていることを確認する。
 
 ---
 

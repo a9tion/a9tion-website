@@ -120,7 +120,6 @@
   <h1>フィードバック入力</h1>
   <span class="store-badge" id="store-badge">店舗名未設定</span>
   <div class="staff-bar">
-    <span>入力者：<strong id="staff-name-display">—</strong></span>
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </div>
 </div>
@@ -165,7 +164,6 @@ const AUTH_KEY = 'a9tion_auth';
 const AUTH_TTL = 24 * 60 * 60 * 1000;
 
 // 認証チェック（ログインしていなければlogin.htmlへ）
-let loggedInStaff = '';
 (function checkAuth() {
   const raw = localStorage.getItem(AUTH_KEY);
   if (!raw) return redirectLogin();
@@ -175,7 +173,6 @@ let loggedInStaff = '';
       localStorage.removeItem(AUTH_KEY);
       return redirectLogin();
     }
-    loggedInStaff = d.name;
   } catch(e) {
     localStorage.removeItem(AUTH_KEY);
     redirectLogin();
@@ -205,7 +202,6 @@ const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbyO3JlAWzhQAI2yvbc
 // ヘッダー
 document.getElementById('header-client').textContent = CLIENT;
 document.getElementById('store-badge').textContent = STORE;
-document.getElementById('staff-name-display').textContent = loggedInStaff;
 
 // ブランドセレクト
 const brandSel = document.getElementById('brand');
@@ -317,7 +313,7 @@ async function submitFeedback() {
     time: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
     store: STORE,
     brand,
-    staff: loggedInStaff,
+    staff: 'スタッフ',
     feedback: text,
     createdAt: now.getTime(),
   };

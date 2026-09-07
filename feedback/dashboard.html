@@ -463,7 +463,7 @@ function showDashboard(pin, clientId, displayName) {
   _pin = pin; _clientId = clientId;
   document.getElementById('screen-pin').classList.remove('active');
   document.getElementById('screen-dashboard').style.display = 'block';
-  document.getElementById('dashboard-title').textContent = displayName + ' — フィードバック';
+  document.getElementById('dashboard-title').textContent = displayName;
   if (DEV_MODE) document.getElementById('btn-sample').style.display = 'inline-block';
   loadDashboard();
 }
