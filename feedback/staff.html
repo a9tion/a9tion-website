@@ -189,7 +189,8 @@ function logout() {
 }
 
 // URLパラメータ
-// 例: ?client=Makuake&store=渋谷サクラステージ&brands=ブランドA,ブランドB
+// 例: ?client=makuake&store=渋谷サクラステージ&brands=ブランドA,ブランドB
+// client は Admin Sheets の client_id（投稿先の識別に使用）
 const params  = new URLSearchParams(location.search);
 const CLIENT  = params.get('client') || 'a9tion';
 const STORE   = params.get('store')  || '店舗名未設定';
@@ -308,6 +309,7 @@ async function submitFeedback() {
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const entry = {
+    client_id: CLIENT,
     id: Date.now().toString(),
     date: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`,
     time: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
